@@ -14,7 +14,7 @@ class YandexTranslateServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/yandex-translate.php' => \Providers\config_path('courier.php'),
+            __DIR__.'/../config/yandex-translate.php' => config_path('yandex-translate.php'),
         ]);
     }
 }
