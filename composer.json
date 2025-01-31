@@ -1,0 +1,35 @@
+{
+  "name": "artem-alekseev/yandex-translate",
+  "type": "library",
+  "description": "Yandex Translate",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Artem Alekseev",
+      "email": "lexx73652@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4 || ^8.0"
+  },
+  "keywords": [
+    "yandex",
+    "translate",
+    "YandexTranslate"
+  ],
+  "autoload": {
+    "psr-4": {
+      "YandexTranslate\\": "src"
+    }
+  },
+  "require-dev": {
+    "illuminate/support": "^9"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "YandexTranslate\\YandexTranslateServiceProvider"
+      ]
+    }
+  }
+}
