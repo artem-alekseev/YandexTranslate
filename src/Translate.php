@@ -55,9 +55,9 @@ class Translate
         return $this;
     }
 
-    public function addText(string $key, string $text)
+    public function addText(string $key, string $text): self
     {
-        $this->texts->push([$key => $text]);
+        $this->texts->offsetSet($key, $text);
 
         return $this;
     }
