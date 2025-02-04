@@ -23,6 +23,8 @@ class Translate
     {
         $this->apiKey = config('yandex-translate.api-key');
         $this->apiUrl = config('yandex-translate.api-url');
+
+        $this->texts = collect();
     }
 
     public function setSourceLanguage(LanguageEnum $languageEnum): self
