@@ -1,6 +1,6 @@
 <?php
 
-namespace YandexTranslate;
+namespace YandexTranslate\Enums;
 
 enum FormatEnum: string
 {

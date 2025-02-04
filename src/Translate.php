@@ -2,42 +2,37 @@
 
 namespace YandexTranslate;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use YandexTranslate\Enums\FormatEnum;
+use YandexTranslate\Enums\LanguageEnum;
 
 class Translate
 {
     private string $apiKey;
     private string $apiUrl;
-    private LanguageEnum $sourceLanguage = LanguageEnum::RUSSIAN;
-    private LanguageEnum $targetLanguage = LanguageEnum::ENGLISH;
+    private string $sourceLanguage;
     private FormatEnum $format = FormatEnum::FORMAT_UNSPECIFIED;
     private bool $speller = false;
-    private Collection $texts;
-
     private string $folderId = '';
 
     public function __construct()
     {
         $this->apiKey = config('yandex-translate.api-key');
         $this->apiUrl = config('yandex-translate.api-url');
+        $this->folderId = config('yandex-translate.folder-id');
 
-        $this->texts = collect();
+        $this->sourceLanguage = config('app.locale');
     }
 
-    public function setSourceLanguage(LanguageEnum $languageEnum): self
+    public function setSourceLanguage(LanguageEnum|string $languageEnum): self
     {
+        if ($languageEnum instanceof LanguageEnum) {
+            $languageEnum = $languageEnum->value;
+        }
+
         $this->sourceLanguage = $languageEnum;
-
-        return $this;
-    }
-
-    public function setTargetLanguage(LanguageEnum $languageEnum): self
-    {
-        $this->targetLanguage = $languageEnum;
 
         return $this;
     }
@@ -56,45 +51,22 @@ class Translate
         return $this;
     }
 
-    public function addText(string $key, string $text): self
+    public function translate(string $targetLanguageCode, string $text): string
     {
-        $this->texts->offsetSet($key, $text);
-
-        return $this;
-    }
-
-    public function setTexts(array|Collection|Model $texts): self
-    {
-        if ($texts instanceof Model) {
-            $texts = $texts->only($texts->translatableFields ?? []);
-        }
-
-        $this->texts = collect($texts);
-
-        return $this;
-    }
-
-    public function translate(): Collection
-    {
-        if ($this->texts->isEmpty()) {
-            throw new \Exception('Not add text, or not fill translatableFields in Model', 500);
-        }
-
         $response = Http::withHeaders(['Authorization' => 'Api-Key ' . $this->apiKey])
             ->post($this->apiUrl, [
-                "sourceLanguageCode" => $this->sourceLanguage->value,
-                "targetLanguageCode" => $this->targetLanguage->value,
+                "sourceLanguageCode" => $this->sourceLanguage,
+                "targetLanguageCode" => $targetLanguageCode,
                 "format" => $this->format->value,
-                "texts" => $this->texts->values()->toArray(),
+                "texts" => [$text],
                 "folderId" => $this->folderId,
                 "speller" => $this->speller,
             ]);
 
-        $response->onError(fn(Response $response) => throw new \Exception($response->body(), $response->status()));
-        $translations = $response->object()->translations;
-        $texts = $this->texts->keys()
-            ->mapWithKeys(fn($key, $value) => [$key => Arr::get($translations, $value)?->text]);
+        $response->onError(fn(Response $response) => throw
+            new \Exception($response->body(), $response->status()
+        ));
 
-        return $texts;
+        return Arr::first($response->object()->translations)?->text;
     }
 }
