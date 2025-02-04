@@ -2,10 +2,11 @@
 
 namespace YandexTranslate;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\Response;
 
 class Translate
 {
@@ -62,10 +63,21 @@ class Translate
         return $this;
     }
 
+    public function setTexts(array|Collection|Model $texts): self
+    {
+        if ($texts instanceof Model) {
+            $texts = $texts->only($texts->translatableFields ?? []);
+        }
+
+        $this->texts = collect($texts);
+
+        return $this;
+    }
+
     public function translate(): Collection
     {
         if ($this->texts->isEmpty()) {
-            throw new \Exception('Empty text, use addText function', 500);
+            throw new \Exception('Not add text, or not fill translatableFields in Model', 500);
         }
 
         $response = Http::withHeaders(['Authorization' => 'Api-Key ' . $this->apiKey])
