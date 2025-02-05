@@ -2,12 +2,22 @@
 
 namespace YandexTranslate;
 
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations as BaseHasTranslations;
 use YandexTranslate\Jobs\UpdateTranslatableField;
 
 trait HasTranslations
 {
     use BaseHasTranslations;
+
+    protected static function booted(): void
+    {
+        static::created(function (Model $model) {
+            foreach ($model->translatable as $field) {
+                UpdateTranslatableField::dispatch($model, $field, $model->$field)->onQueue('translate');
+            }
+        });
+    }
 
     public function setAttribute($key, $value)
     {
@@ -19,7 +29,9 @@ trait HasTranslations
             return $this->setTranslations($key, $value);
         }
 
-        UpdateTranslatableField::dispatch($this, $key, $value)->onQueue('translate');
+        if ($this->exists && $this->$key != $value) {
+            UpdateTranslatableField::dispatch($this, $key, $value)->onQueue('translate');
+        }
 
         return $this->setTranslation($key, $this->getLocale(), $value);
     }

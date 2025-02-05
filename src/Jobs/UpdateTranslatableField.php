@@ -16,7 +16,7 @@ class UpdateTranslatableField implements ShouldQueue
     public function __construct(
         public Model $model,
         public string $key,
-        public string $value,
+        public ?string $value,
     ) {
         $this->locales = config('yandex-translate.locales');
     }
@@ -32,7 +32,7 @@ class UpdateTranslatableField implements ShouldQueue
             }
 
             $translate = Translatable::translate($locale, $this->value);
-            $this->model->setTranslation($this->key, $locale, $translate);
+            $this->model->setTranslation($this->key, $locale, $translate)->save();
         }
     }
 }

@@ -13,15 +13,16 @@ class Translate
     private string $apiKey;
     private string $apiUrl;
     private string $sourceLanguage;
-    private FormatEnum $format = FormatEnum::FORMAT_UNSPECIFIED;
+    private FormatEnum $format;
     private bool $speller = false;
-    private ?string $folderId = '';
+    private string $folderId;
 
     public function __construct()
     {
         $this->apiKey = config('yandex-translate.api-key');
         $this->apiUrl = config('yandex-translate.api-url');
         $this->folderId = config('yandex-translate.folder-id');
+        $this->format = config('yandex-translate.format');
 
         $this->sourceLanguage = config('app.locale');
     }
@@ -64,10 +65,10 @@ class Translate
             ]);
 
         $response->onError(fn (Response $response) => throw
-            new \Exception(
-                $response->body(),
-                $response->status()
-            ));
+        new \Exception(
+            $response->body(),
+            $response->status()
+        ));
 
         return Arr::first($response->object()->translations)?->text;
     }
