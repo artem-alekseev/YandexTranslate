@@ -13,7 +13,7 @@ use YandexTranslate\Translate;
  * @method static Translate setSourceLanguage(LanguageEnum|string $languageEnum)
  * @method static Translate setFormat(FormatEnum $formatEnum)
  * @method static Translate enableSpellChecker()
- * @method static string translate(string $targetLanguageCode, string $text)
+ * @method static string translate(LanguageEnum|string $targetLanguageCode, string $text)
  *
  */
 class Translatable extends Facade

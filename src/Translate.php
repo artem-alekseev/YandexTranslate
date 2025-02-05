@@ -52,8 +52,12 @@ class Translate
         return $this;
     }
 
-    public function translate(string $targetLanguageCode, string $text): string
+    public function translate(LanguageEnum|string $targetLanguageCode, string $text): string
     {
+        if ($targetLanguageCode instanceof LanguageEnum) {
+            $targetLanguageCode = $targetLanguageCode->value;
+        }
+
         $response = Http::withHeaders(['Authorization' => 'Api-Key ' . $this->apiKey])
             ->post($this->apiUrl, [
                 "sourceLanguageCode" => $this->sourceLanguage,
