@@ -15,7 +15,7 @@ class Translate
     private string $sourceLanguage;
     private FormatEnum $format = FormatEnum::FORMAT_UNSPECIFIED;
     private bool $speller = false;
-    private string $folderId = '';
+    private ?string $folderId = '';
 
     public function __construct()
     {
@@ -63,9 +63,11 @@ class Translate
                 "speller" => $this->speller,
             ]);
 
-        $response->onError(fn(Response $response) => throw
-            new \Exception($response->body(), $response->status()
-        ));
+        $response->onError(fn (Response $response) => throw
+            new \Exception(
+                $response->body(),
+                $response->status()
+            ));
 
         return Arr::first($response->object()->translations)?->text;
     }

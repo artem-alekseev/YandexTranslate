@@ -2,9 +2,8 @@
 
 namespace YandexTranslate;
 
-use Illuminate\Support\Arr;
 use Spatie\Translatable\HasTranslations as BaseHasTranslations;
-use YandexTranslate\Facades\Translatable;
+use YandexTranslate\Jobs\UpdateTranslatableField;
 
 trait HasTranslations
 {
@@ -20,18 +19,8 @@ trait HasTranslations
             return $this->setTranslations($key, $value);
         }
 
-        $this->updateTranslatableField($key, $value);
+        UpdateTranslatableField::dispatch($this, $key, $value)->onQueue('translate');
 
         return $this->setTranslation($key, $this->getLocale(), $value);
-    }
-    public function updateTranslatableField($key, $value): void
-    {
-        $locales = Arr::except(config('yandex-translate.locales'), $this->getLocale());
-
-        foreach ($locales as $locale) {
-            $translate = Translatable::translate($locale, $value);
-
-            $this->setTranslation($key, $this->getLocale(), $translate);
-        }
     }
 }
